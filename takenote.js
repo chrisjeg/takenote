@@ -6,36 +6,43 @@ class TakeNote extends EventEmitter{
 		midiInput,
 		lowNote = 0,
 		highNote = 120,
-		firstLedNote,
-		lastLedNote,
+		ledLowNote,
+		ledHighNote,
 		numLeds = 30,
 		isInverted = false
 	}){
 		super();
 		this.lowNote = lowNote;
-		this.firstLedNote = firstLedNote;
+		this.ledLowNote = ledLowNote || lowNote;
 		this.highNote = highNote;
-		this.lastLedNote = lastLedNote;
+		this.ledHighNote = ledHighNote || highNote;
 		this.numLeds = numLeds;
 		this.isInverted = isInverted;
 		this.colours = 12;
 
-		this.keyboardMap = Array(highNote-lowNote).fill(0).map(()=>({v:0,chords:[]}));
+		this._keyboardMap = Array(highNote-lowNote).fill(0).map(()=>({v:0,chords:[]}));
+		this._ledMap = Array(numLeds).fill(0).map(()=>({velocity:0,key:0}));
 		this.activeChords = {};
 
 		midiInput.on('message',(delta,message)=>{
 			let event = helper.toEvent(message);
 			if(event.id === 'key'){
-				this.keyboardMap[event.key].v = event.velocity;
+				this._keyboardMap[event.key].v = event.velocity;
+				this._ledMap[helper.key2Led(
+					event.key,
+					this.numLeds,
+					this.ledLowNote,
+					this.ledHighNote)] = {velocity:event.velocity,key:event.key};
+				this.emit('keyPress',{key:event.key,velocity:event.velocity});
 			}
 		});
 
-		//Sets the LEDs to die, even if a key off hasn't been registered
+		//Sets the LEDs to die, even if a key off hasn't been registered (desperately targetting 60fps)
 		setInterval(()=>{
-			this.keyboardMap.forEach((key,index,map)=>{
-				if(map[index].v > 0) map[index].v -= 1;
+			this._ledMap.forEach((led,index,map)=>{
+				if(map[index].velocity > 0) map[index].velocity -= 1;
 			});
-		},15);
+		},16);
 
 	}
 
@@ -54,19 +61,11 @@ class TakeNote extends EventEmitter{
 	}
 
 	get map(){
-		return this.keyboardMap;
+		return this._keyboardMap;
 	}
 
 	get chromaMap(){
-		return this.keyboardMap.map((x,i)=>{
-			return {
-		    r: x.v * 2,
-		    g: x.v * 2,
-		    b: x.v * 2,
-		    n: i,
-		    v: x.v * 2
-		  	};
-	  });
+		return this._ledMap.map((x)=>this.colouriseKey(x.key,x.velocity));
 	}
 
 }

@@ -1,9 +1,32 @@
+//The lowest and highest midi notes on your midi instrument
+const LOW_NOTE = 31, HIGH_NOTE = 101;
+// Useful if your strip is shorter than your instrument
+const LED_LOW_NOTE = 29, LED_HIGH_NOTE = 103;
+//The number of LEDs on your strip
+const NUM_LEDS = 30;
+// If your strip is backwards...not by accident I swear
+const STRIP_INVERTED = true;
+
 const midi = require('midi'),
 	TakeNote = require('./takenote.js');
-var midiInput = new midi.input();
+
+// You must provide TakeNote with a MIDI emitter, for real time midi then the
+// "midi" package by justinlatimer is perfect. (npm install midi)
+const midiInput = new midi.input();
 midiInput.openPort(1);
 
-var note = new TakeNote({midiInput});
+const note_config = {
+	midiInput,
+	lowNote: LOW_NOTE,
+	highNote: HIGH_NOTE,
+	ledLowNote: LED_LOW_NOTE,
+	ledHighNote: LED_HIGH_NOTE,
+	numLeds: NUM_LEDS,
+	isInverted: STRIP_INVERTED
+}
+
+const note = new TakeNote(note_config);
+note.on('keyPress',(e)=>console.log(e.key,' was pressed with velocity ',e.velocity));
 
 process.on('SIGINT', function () {
   midiInput.closePort();
