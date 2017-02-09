@@ -1,5 +1,5 @@
 //The lowest and highest midi notes on your midi instrument
-const LOW_NOTE = 31, HIGH_NOTE = 101;
+const LOW_NOTE = 0, HIGH_NOTE = 120;
 // Useful if your strip is shorter than your instrument
 const LED_LOW_NOTE = 29, LED_HIGH_NOTE = 103;
 //The number of LEDs on your strip
@@ -23,12 +23,15 @@ const note_config = {
 	ledHighNote: LED_HIGH_NOTE,
 	numLeds: NUM_LEDS,
 	isInverted: STRIP_INVERTED
-}
+};
 
 const note = new TakeNote(note_config);
-note.on('keyPress',(e)=>console.log(e.key,' was pressed with velocity ',e.velocity));
+note.on('keyPress',(e)=>console.log(`Key ${e.key} was pressed with velocity ${e.velocity}`));
+note.on('keyRelease',(e)=>console.log(`Key ${TakeNote.toPitch(e.key).spn} was released`));
+note.on('sustainOn',(e)=>console.log(`Sustain pedal was pressed`));
+note.on('sustainOff',(e)=>console.log(`Sustain pedal was released`));
 
 process.on('SIGINT', function () {
-  midiInput.closePort();
-  process.nextTick(function () { process.exit(0); });
+	midiInput.closePort();
+	process.nextTick(function () { process.exit(0); });
 });
