@@ -13,13 +13,14 @@ class TakeNote extends EventEmitter{
 		isInverted = false
 	}){
 		super();
-		this.lowNote = lowNote;
-		this.ledLowNote = ledLowNote || lowNote;
-		this.highNote = highNote;
-		this.ledHighNote = ledHighNote || highNote;
-		this.numLeds = numLeds;
-		this.isInverted = isInverted;
-		this.colours = 12;
+		this.config = {
+			lowNote,
+			highNote,
+			ledLowNote : ledLowNote || lowNote,
+			ledHighNote : ledHighNote || highNote,
+			numLeds,
+			isInverted
+		};
 
 		this._keyboardMap = Array(highNote-lowNote).fill(0).map(()=>({velocity:0,chords:[]}));
 		this._ledMap = Array(numLeds).fill(0).map(()=>({velocity:0,key:0}));
@@ -27,8 +28,9 @@ class TakeNote extends EventEmitter{
 		this.activeChords = {};
 
 		midiInput.on('message',(delta,message)=>{
+			let { ledLowNote, ledHighNote, numLeds } = this.config;
 			let event = helper.toEvent(message);
-			let ledIndex = helper.key2Led(event.key, this.numLeds, this.ledLowNote, this.ledHighNote);
+			let ledIndex = helper.key2Led(event.key, numLeds, ledLowNote, ledHighNote);
 			if(event.id === 'key'){
 				this._keyboardMap[event.key].v = event.velocity;
 				let emitEvent = (event.velocity > 0) ? 'keyPress' : 'keyRelease';
