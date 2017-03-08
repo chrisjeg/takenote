@@ -7,12 +7,13 @@ const NUM_LEDS = 30;
 // If your strip is backwards...not by accident I swear
 const STRIP_INVERTED = true;
 
-const midi = require('midi'),
-	TakeNote = require('./takenote.js');
+const TakeNote = require('./takenote.js');
+const	midimock = require('./test/testMidiEmitter.js');
 
 // You must provide TakeNote with a MIDI emitter, for real time midi then the
 // "midi" package by justinlatimer is perfect. (npm install midi)
-const midiInput = new midi.input();
+// const midiInput = new midi.input();
+const midiInput = new midimock();
 midiInput.openPort(1);
 
 const note_config = {
@@ -32,6 +33,6 @@ note.on('sustainOn',(e)=>console.log(`Sustain pedal was pressed`));
 note.on('sustainOff',(e)=>console.log(`Sustain pedal was released`));
 
 process.on('SIGINT', function () {
-	midiInput.closePort();
+	// midiInput.closePort();
 	process.nextTick(function () { process.exit(0); });
 });

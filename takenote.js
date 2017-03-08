@@ -29,9 +29,12 @@ class TakeNote extends EventEmitter{
 
 		midiInput.on('message',(delta,message)=>{
 			let { ledLowNote, ledHighNote, numLeds } = this.config;
+			// Convert the message to an event object
 			let event = helper.toEvent(message);
-			let ledIndex = helper.key2Led(event.key, numLeds, ledLowNote, ledHighNote);
+			// In the event of a key
 			if(event.id === 'key'){
+				// Generate an led index for the key
+				let ledIndex = helper.key2Led(event.key, numLeds, ledLowNote, ledHighNote);
 				this._keyboardMap[event.key].v = event.velocity;
 				let emitEvent = (event.velocity > 0) ? 'keyPress' : 'keyRelease';
 				this.emit(emitEvent,{key:event.key,velocity:event.velocity});
