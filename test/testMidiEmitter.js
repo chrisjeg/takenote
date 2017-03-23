@@ -10,13 +10,14 @@ class TestEmitter extends EventEmitter{
     super();
     this.interval = null;
   }
+
   openPort(){
     clearInterval(this.interval);
     this.interval = setInterval(()=>{
       this.emit('message',500,[144,sequence[pos],0])
       pos = (pos + 1) % sequence.length;
       this.emit('message',500,[144,sequence[pos],Math.floor(Math.random()*27+100)])
-    },500)
+    },50)
   }
 
   closePort(){

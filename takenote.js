@@ -31,13 +31,19 @@ class TakeNote extends EventEmitter{
 			let { ledLowNote, ledHighNote, numLeds } = this.config;
 			// Convert the message to an event object
 			let event = helper.toEvent(message);
+
 			// In the event of a key
 			if(event.id === 'key'){
 				// Generate an led index for the key
 				let ledIndex = helper.key2Led(event.key, numLeds, ledLowNote, ledHighNote);
+
+				// Update the keymap
 				this._keyboardMap[event.key].v = event.velocity;
+
+				// Emit the keypress event
 				let emitEvent = (event.velocity > 0) ? 'keyPress' : 'keyRelease';
 				this.emit(emitEvent,{key:event.key,velocity:event.velocity});
+
 				//If the event is a key press, or this keypress is affecting the same light it initiated
 				if(event.velocity > 0 || event.key === this._ledMap[ledIndex].key) {
 					this._ledMap[ledIndex] = {velocity:event.velocity,key:event.key};
