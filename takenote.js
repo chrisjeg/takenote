@@ -28,14 +28,14 @@ class TakeNote extends EventEmitter{
 		this.activeChords = {};
 
 		midiInput.on('message',(delta,message)=>{
-			let { ledLowNote, ledHighNote, numLeds } = this.config;
+			let { ledLowNote, ledHighNote, numLeds, isInverted } = this.config;
 			// Convert the message to an event object
 			let event = helper.toEvent(message);
 
 			// In the event of a key
 			if(event.id === 'key'){
 				// Generate an led index for the key
-				let ledIndex = helper.key2Led(event.key, numLeds, ledLowNote, ledHighNote);
+				let ledIndex = helper.key2Led(event.key, numLeds, ledLowNote, ledHighNote, isInverted);
 
 				// Update the keymap
 				this._keyboardMap[event.key].v = event.velocity;
