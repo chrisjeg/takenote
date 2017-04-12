@@ -26,23 +26,41 @@ class TakeNote extends EventEmitter{
 		this._ledMap = Array(numLeds).fill(0).map(()=>({velocity:0,key:0}));
 		this._sustain = true;
 		this.activeChords = {};
+		this.expectedNext = [];
+		this.patternTests = {
+			// money:[60,72,67,60,55,58,60,63,60],
+			// singleNote:[100],
+			threeNotes:[100,102,103],
+			chordExample:[[96,100,103],[98,101,105]]
+		};
 
+		this.checkRules = this.checkRules.bind(this);
+		let startTime = process.hrtime();
 		midiInput.on('message',(delta,message)=>{
+			let eventTime = process.hrtime(startTime);
 			let { ledLowNote, ledHighNote, numLeds, isInverted } = this.config;
 			// Convert the message to an event object
 			let event = helper.toEvent(message);
 
 			// In the event of a key
 			if(event.id === 'key'){
+				let normalisedTime = Math.round((eventTime[0]*1e9 + eventTime[1])*1e-6);
+
 				// Generate an led index for the key
 				let ledIndex = helper.key2Led(event.key, numLeds, ledLowNote, ledHighNote, isInverted);
-
+				if(event.velocity > 0){
+					this.checkRules(event.key,normalisedTime,this.patternTests);
+				}
 				// Update the keymap
 				this._keyboardMap[event.key].v = event.velocity;
 
 				// Emit the keypress event
 				let emitEvent = (event.velocity > 0) ? 'keyPress' : 'keyRelease';
-				this.emit(emitEvent,{key:event.key,velocity:event.velocity});
+				this.emit(emitEvent,{
+					key:event.key,
+					velocity:event.velocity,
+					time:normalisedTime
+				});
 
 				//If the event is a key press, or this keypress is affecting the same light it initiated
 				if(event.velocity > 0 || event.key === this._ledMap[ledIndex].key) {
@@ -80,6 +98,77 @@ class TakeNote extends EventEmitter{
 		} else {
 			return 0;
 		}
+	}
+
+	checkRules(key,time,patterns){
+		//Reverse for loop, otherwise splice will ruin your life
+		for(let i = this.expectedNext.length-1; i>=0; i-=1){
+			let test = this.expectedNext[i];
+
+			if(time > this.expectedNext[i].timeout){
+				this.expectedNext.splice(i,1);
+			}
+
+			if(test.note instanceof Array){
+				let remainingNotes = test.note.filter(note=>key!==note);
+				if(test.note.length !== remainingNotes.length){
+					this.expectedNext[i] = {
+						name: test.name,
+						note: (remainingNotes.length > 1) ? remainingNotes : remainingNotes[0],
+						nextPosition: test.nextPosition,
+						timeout: time+1000
+					};
+				}
+			} else {
+				if(key===test.note){
+					let isLastNote = (test.nextPosition === patterns[test.name].length);
+					if(isLastNote){
+						this.emit('patternMatch',test.name);
+						this.expectedNext.splice(i,1);
+					} else {
+						this.expectedNext[i] = {
+							name: test.name,
+							note: patterns[test.name][test.nextPosition],
+							nextPosition: test.nextPosition + 1,
+							timeout: time+1000
+						};
+					}
+				} else {
+					this.expectedNext.splice(i,1);
+				}
+			}
+		}
+
+		//Check the existing tests and add any new rules
+		Object.keys(patterns).map(name=>{
+			let pattern = patterns[name];
+			//If the first note is a chord
+			if(pattern[0] instanceof Array){
+				let remainingNotes = pattern[0].filter(note=>key!==note);
+				if (pattern[0].length !== remainingNotes.length){
+					this.expectedNext.push({
+						name,
+						note:(remainingNotes.length > 1) ? remainingNotes : remainingNotes[0],
+						nextPosition: (remainingNotes.length > 1) ? 1 : 2,
+						timeout: time+1000
+					});
+				}
+			//If the first note is a note
+			} else {
+				if(key===pattern[0]){
+					if(pattern.length === 1){
+						this.emit('patternMatch',name);
+					} else {
+						this.expectedNext.push({
+							name,
+							note:pattern[1],
+							nextPosition: 2,
+							timeout: time+1000
+						});
+					}
+				}
+			}
+		});
 	}
 
 	static toPitch(key){

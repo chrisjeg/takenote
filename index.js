@@ -28,10 +28,11 @@ const note_config = {
 };
 
 const note = new TakeNote(note_config);
-note.on('keyPress',(e)=>console.log(`Key ${e.key} was pressed with velocity ${e.velocity}`));
-note.on('keyRelease',(e)=>console.log(`Key ${TakeNote.toPitch(e.key).spn} was released`));
+// note.on('keyPress',(e)=>console.log(`Key ${e.key} was pressed with velocity ${e.velocity}`));
+// note.on('keyRelease',(e)=>console.log(`Key ${TakeNote.toPitch(e.key).spn} was released`));
 note.on('sustainOn',(e)=>console.log(`Sustain pedal was pressed`));
 note.on('sustainOff',(e)=>console.log(`Sustain pedal was released`));
+note.on('patternMatch',x=>console.log('\x1b[36m',`Rule ${x} was matched`,'\x1b[0m'));
 
 process.on('SIGINT', function () {
 	// midiInput.closePort();
