@@ -1,6 +1,7 @@
 const EventEmitter = require('events');
 const helper = require('./lib/midiHelpers');
 const theory = require('./lib/theoryHelpers');
+const rules = require('./lib/rules');
 
 class TakeNote extends EventEmitter{
 	constructor({
@@ -27,15 +28,12 @@ class TakeNote extends EventEmitter{
 		this._sustain = true;
 		this.activeChords = {};
 		this.expectedNext = [];
-		this.patternTests = {
-			money:[60,72,67,60,55,58,60,63,60],
-			singleNote:[100],
-			threeNotes:[100,102,103],
-			chordExample:[[96,100,103],[98,101,105]]
-		};
+		this.patternTests = {};
 
-		this.checkRules = this.checkRules.bind(this);
+		this.addRule = this.addRules.bind(this);
+
 		let startTime = process.hrtime();
+
 		midiInput.on('message',(delta,message)=>{
 			let eventTime = process.hrtime(startTime);
 			let { ledLowNote, ledHighNote, numLeds, isInverted } = this.config;
@@ -49,7 +47,11 @@ class TakeNote extends EventEmitter{
 				// Generate an led index for the key
 				let ledIndex = helper.key2Led(event.key, numLeds, ledLowNote, ledHighNote, isInverted);
 				if(event.velocity > 0){
-					this.checkRules(event.key,normalisedTime,this.patternTests);
+					rules.checkRules.call(
+						this,
+						event.key,
+						normalisedTime,
+						this.patternTests);
 				}
 				// Update the keymap
 				this._keyboardMap[event.key].v = event.velocity;
@@ -100,74 +102,8 @@ class TakeNote extends EventEmitter{
 		}
 	}
 
-	checkRules(key,time,patterns){
-		//Reverse for loop, otherwise splice will ruin your life
-		this.expectedNext = this.expectedNext
-			.map(test=>{
-				// Give up immediately if rule has timed out
-				if(time > test.timeout){
-					return null;
-				//If the note is an array, then treat as a chord
-				} else if (test.note instanceof Array){
-					let remainingNotes = test.note.filter(note=>key!==note);
-					if(test.note.length !== remainingNotes.length){
-						return {
-							name: test.name,
-							note: (remainingNotes.length > 1) ? remainingNotes : remainingNotes[0],
-							nextPosition: test.nextPosition,
-							timeout: test.timeout
-						};
-					}
-				// If it's not a chord, check the key is exactly the note required
-				} else if (key === test.note) {
-					let isLastNote = (test.nextPosition === patterns[test.name].length);
-
-					if(isLastNote){
-						this.emit('patternMatch',test.name);
-						return null;
-					} else {
-						return {
-							name: test.name,
-							note: patterns[test.name][test.nextPosition],
-							nextPosition: test.nextPosition + 1,
-							timeout: time+1000
-						};
-					}
-				}
-				return null;
-			})
-			.filter(x=>x!==null);
-
-		//Check the existing tests and add any new rules
-		Object.keys(patterns).map(name=>{
-			let pattern = patterns[name];
-			//If the first note is a chord
-			if(pattern[0] instanceof Array){
-				let remainingNotes = pattern[0].filter(note=>key!==note);
-				if (pattern[0].length !== remainingNotes.length){
-					this.expectedNext.push({
-						name,
-						note:(remainingNotes.length > 1) ? remainingNotes : remainingNotes[0],
-						nextPosition: (remainingNotes.length > 1) ? 1 : 2,
-						timeout: time+300
-					});
-				}
-			//If the first note is a note
-			} else {
-				if(key===pattern[0]){
-					if(pattern.length === 1){
-						this.emit('patternMatch',name);
-					} else {
-						this.expectedNext.push({
-							name,
-							note:pattern[1],
-							nextPosition: 2,
-							timeout: time+1000
-						});
-					}
-				}
-			}
-		});
+	addRule(ruleName, ruleObject){
+		this.patternTests[ruleName] = ruleObject;
 	}
 
 	static toPitch(key){

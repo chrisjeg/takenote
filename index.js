@@ -28,6 +28,10 @@ const note_config = {
 };
 
 const note = new TakeNote(note_config);
+note.addRule('money',[60,72,67,60,55,58,60,63,60]);
+note.addRule('singleNote',[100]);
+note.addRule('threeNotes',[100,102,103]);
+note.addRule('chordExample',[[96,100,103],[98,101,105]]);
 // note.on('keyPress',(e)=>console.log(`Key ${e.key} was pressed with velocity ${e.velocity}`));
 // note.on('keyRelease',(e)=>console.log(`Key ${TakeNote.toPitch(e.key).spn} was released`));
 note.on('sustainOn',(e)=>console.log(`Sustain pedal was pressed`));
