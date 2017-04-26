@@ -34,8 +34,8 @@ note.addRule('threeNotes',[100,102,103]);
 note.addRule('chordExample',[[96,100,103],[98,101,105]]);
 // note.on('keyPress',(e)=>console.log(`Key ${e.key} was pressed with velocity ${e.velocity}`));
 // note.on('keyRelease',(e)=>console.log(`Key ${TakeNote.toPitch(e.key).spn} was released`));
-note.on('sustainOn',(e)=>console.log(`Sustain pedal was pressed`));
-note.on('sustainOff',(e)=>console.log(`Sustain pedal was released`));
+note.on('sustainOn',()=>console.log(`Sustain pedal was pressed`));
+note.on('sustainOff',()=>console.log(`Sustain pedal was released`));
 note.on('patternMatch',x=>console.log('\x1b[36m',`Rule ${x} was matched`,'\x1b[0m'));
 
 process.on('SIGINT', function () {
