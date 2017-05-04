@@ -1,22 +1,29 @@
 {
   "name": "takenote",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "",
   "main": "takenote.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {},
-	"repository" : {
-		"type" : "git",
-		"url" : "https://github.com/chrisjeg/takenote.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chrisjeg/takenote.git"
   },
-	"keywords":["midi","music","IoT","chords","chromesthesia","midi-events"],
+  "keywords": [
+    "midi",
+    "music",
+    "IoT",
+    "chords",
+    "chromesthesia",
+    "midi-events"
+  ],
   "author": "Chris Jeganathan",
   "license": "ISC",
   "devDependencies": {
     "eslint": "^3.15.0",
     "midi-file": "^1.0.2",
-		"midi": "^0.9.5"
+    "midi": "^0.9.5"
   }
 }
