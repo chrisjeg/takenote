@@ -1,6 +1,9 @@
 # TakeNote.js:musical_note:
 
 ## What is TakeNote?
+> TakeNote: If you want to play "Hungry like the Wolf" on your piano to get your
+fridge to order more bacon, then this is a good place to start :thumbsup:
+
 TakeNote:musical_note: is a layer that sits on top of a MIDI connection in order to provide an
 abstraction that is musically comprehensible and allows for interfacing with
 other devices.
@@ -11,13 +14,10 @@ npm, and provides requestable abstractions and emits musically significant event
 
 It's quick too! I'm running all this code off a Raspberry Pi 1 Model B.
 
-Basically, if you want to play "Hungry like the Wolf" on your piano to get your
-fridge to order more bacon, then this is a good place to start :thumbsup:
+
 
 It's also worth noting:musical_note: that **this project is under active development.
  I plan on breaking things for the greater good**, just so you know...
-
-![The greater good](https://media.giphy.com/media/I6Ze1u9AwbWb6/giphy.gif)
 
 ## Installation
 
