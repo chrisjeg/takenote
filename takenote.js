@@ -23,14 +23,14 @@ class TakeNote extends EventEmitter{
 			isInverted
 		};
 
-		this._keyboardMap = Array(highNote-lowNote).fill(0).map(()=>({velocity:0,chords:[]}));
-		this._ledMap = Array(numLeds).fill(0).map(()=>({velocity:0,key:0}));
+		this._keyboardMap = Array(highNote-lowNote).fill({velocity:0,chords:[]});
+		this._ledMap = Array(numLeds).fill({velocity:0,key:0});
 		this._sustain = true;
 		this.activeChords = {};
 		this.expectedNext = [];
 		this.patternTests = {};
 
-		this.addRule = this.addRules.bind(this);
+		this.addRule = this.addRule.bind(this);
 
 		let startTime = process.hrtime();
 

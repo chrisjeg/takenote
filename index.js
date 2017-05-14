@@ -28,10 +28,24 @@ const note_config = {
 };
 
 const note = new TakeNote(note_config);
-note.addRule('money',[60,72,67,60,55,58,60,63,60]);
-note.addRule('singleNote',[100]);
-note.addRule('threeNotes',[100,102,103]);
-note.addRule('chordExample',[[96,100,103],[98,101,105]]);
+note.addRule('money',[
+	{notes:60},
+	{notes:72},
+	{notes:67},
+	{notes:60},
+	{notes:55},
+	{notes:58},
+	{notes:60},
+	{notes:63},
+	{notes:60}
+]);
+note.addRule('singleNote',[{notes:100}]);
+note.addRule('threeNotes',[
+	{notes:100},
+	{notes:102},
+	{notes:103}
+]);
+// note.addRule('chordExample',[[96,100,103],[98,101,105]]);
 note.on('keyPress',(e)=>console.log(`Key ${e.key} was pressed with velocity ${e.velocity}`));
 note.on('keyRelease',(e)=>console.log(`Key ${TakeNote.toPitch(e.key).spn} was released`));
 note.on('sustainOn',()=>console.log(`Sustain pedal was pressed`));
@@ -39,6 +53,6 @@ note.on('sustainOff',()=>console.log(`Sustain pedal was released`));
 note.on('patternMatch',x=>console.log('\x1b[36m',`Rule ${x} was matched`,'\x1b[0m'));
 
 process.on('SIGINT', function () {
-	// midiInput.closePort();
+	midiInput.closePort();
 	process.nextTick(function () { process.exit(0); });
 });
