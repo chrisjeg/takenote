@@ -8,7 +8,7 @@ const NUM_LEDS = 30;
 const STRIP_INVERTED = true;
 
 const TakeNote = require('./takenote.js');
-// const	midimock = require('./test/testMidiEmitter.js');
+// const midimock = require('./__test__/MockMidiEmitter.js');
 const midi = require('midi');
 
 // You must provide TakeNote with a MIDI emitter, for real time midi then the
