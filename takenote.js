@@ -1,6 +1,7 @@
 const EventEmitter = require('events');
-const helper = require('./lib/midiHelpers');
-const theory = require('./lib/theoryHelpers');
+
+const message = require('./lib/message');
+const theory = require('./lib/theory');
 const rules = require('./lib/rules');
 
 class TakeNote extends EventEmitter{
@@ -38,14 +39,14 @@ class TakeNote extends EventEmitter{
 			let eventTime = process.hrtime(startTime);
 			let { ledLowNote, ledHighNote, numLeds, isInverted } = this.config;
 			// Convert the message to an event object
-			let event = helper.toEvent(message);
+			let event = message.toEvent(message);
 
 			// In the event of a key
 			if(event.id === 'key'){
 				let normalisedTime = Math.round((eventTime[0]*1e9 + eventTime[1])*1e-6);
 
 				// Generate an led index for the key
-				let ledIndex = helper.key2Led(event.key, numLeds, ledLowNote, ledHighNote, isInverted);
+				let ledIndex = message.key2Led(event.key, numLeds, ledLowNote, ledHighNote, isInverted);
 				if(event.velocity > 0){
 					rules.checkRules.call(
 						this,
@@ -92,11 +93,11 @@ class TakeNote extends EventEmitter{
 		if(velocity > 0){
 			let r,g,b,v;
 			v = velocity*2; //velocity is half of brightness
-			let n = helper.normalise(key);
-			r = helper.calculateBrightness(n,0)*v;
-			g = helper.calculateBrightness(n,(2/3))*v;
-			b = helper.calculateBrightness(n,(1/3))*v;
-			return helper.toBinaryRGB(r,g,b);
+			let n = message.normalise(key);
+			r = message.calculateBrightness(n,0)*v;
+			g = message.calculateBrightness(n,(2/3))*v;
+			b = message.calculateBrightness(n,(1/3))*v;
+			return message.toBinaryRGB(r,g,b);
 		} else {
 			return 0;
 		}
